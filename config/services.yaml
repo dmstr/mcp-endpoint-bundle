@@ -1,0 +1,103 @@
+# file generated with AI assistance: Claude Code - 2026-10-08 22:21:34 UTC
+# Services of dmstr/mcp-endpoint-bundle, imported by McpEndpointBundle::loadExtension().
+# The application's _instanceof rules do not reach services defined here, so every
+# tag the bundle relies on is declared explicitly in this file.
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: false
+
+    # Looks up API Platform MCP tools by name (McpTool operations) and reads
+    # their read-only hint and scope key.
+    Dmstr\McpEndpoint\Tool\ToolInspector:
+        arguments:
+            $operationMetadataFactory: '@api_platform.mcp.metadata.operation.mcp_factory'
+
+    # Scope resolvers by scope key, from the tagged services.
+    Dmstr\McpEndpoint\Scope\ScopeResolverRegistry:
+        arguments:
+            $resolvers: !tagged_iterator dmstr_mcp_endpoint.scope_resolver
+
+    # Class constraint of McpEndpoint (tools, read-only, scope, retrieval).
+    # The entity manager gives the stored scope: an id of the stored scope
+    # that no longer resolves is dropped instead of refused.
+    Dmstr\McpEndpoint\Validator\ValidMcpEndpointValidator:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+        tags: ['validator.constraint_validator']
+
+    # Removes the id of a deleted target (e.g. a document collection) from
+    # the scope of every endpoint; called by the owner of the target.
+    Dmstr\McpEndpoint\Scope\ScopePruner:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+
+    # Application-wide endpoint defaults. Fail closed (no write tools); the
+    # application replaces the alias with its own implementation.
+    Dmstr\McpEndpoint\Policy\DefaultMcpEndpointPolicy: ~
+    Dmstr\McpEndpoint\Policy\McpEndpointPolicyInterface:
+        alias: Dmstr\McpEndpoint\Policy\DefaultMcpEndpointPolicy
+
+    # Endpoint lookup by slug (unknown and disabled = null); a test kernel
+    # may alias the interface to an in-memory implementation.
+    Dmstr\McpEndpoint\Endpoint\DoctrineMcpEndpointProvider:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+    Dmstr\McpEndpoint\Endpoint\McpEndpointProviderInterface:
+        alias: Dmstr\McpEndpoint\Endpoint\DoctrineMcpEndpointProvider
+
+    # Checks the stored permission against the registered list when the host
+    # application provides it (parameter za7_core.permissions.registered).
+    Dmstr\McpEndpoint\Validator\RegisteredPermissionValidator:
+        arguments:
+            $parameters: '@parameter_bag'
+        tags: ['validator.constraint_validator']
+
+    # Announces the permissions this bundle checks to the permission voter of
+    # the host application (container tag, plain strings; the application maps
+    # them to roles).
+    # Permissions of single endpoints are registered by the application.
+    Dmstr\McpEndpoint\Security\McpEndpointPermissions:
+        tags:
+            - { name: za7_core.permission, permission: !php/const Dmstr\McpEndpoint\Security\McpEndpointPermissions::ENDPOINT_MANAGE }
+            - { name: za7_core.permission, permission: !php/const Dmstr\McpEndpoint\Security\McpEndpointPermissions::ENDPOINT_USE }
+
+    # Idempotent seed of one endpoint (#[AsCommand]).
+    Dmstr\McpEndpoint\Command\EndpointSeedCommand:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+            $validator: '@validator'
+        tags: ['console.command']
+
+    # --- Request-time enforcement --------------------------------------------
+    # Server-specific services (controller, session store decorator) are
+    # registered in McpEndpointBundle::loadExtension() from the option
+    # `server`.
+
+    # The endpoint of the current request; only the controller fills it.
+    Dmstr\McpEndpoint\Context\McpEndpointContext:
+        tags: [{ name: kernel.reset, method: reset }]
+
+    # The one decision whether the current endpoint offers a tool, for
+    # tools/list and tools/call alike.
+    Dmstr\McpEndpoint\Security\EndpointToolGate: ~
+
+    # tools/list (and resources/list) filter. API Platform's McpRegistryPass
+    # passes the checker by id, so the decorator takes its place.
+    Dmstr\McpEndpoint\Security\EndpointAccessChecker:
+        decorates: api_platform.mcp.security.expression_access_checker
+        arguments:
+            $inner: '@.inner'
+
+    # tools/call guard; the tag mcp.request_handler moves to the decorator.
+    Dmstr\McpEndpoint\Server\EndpointHandler:
+        decorates: api_platform.mcp.handler
+        arguments:
+            $inner: '@.inner'
+            $callGuard: '%dmstr_mcp_endpoint.call_guard%'
+
+    # Default deny for requests the SDK would serve from the unfiltered
+    # registry (prompts, resources, unknown tools); after EndpointHandler,
+    # before the SDK's own handlers.
+    Dmstr\McpEndpoint\Server\UnservedRequestHandler:
+        tags: [{ name: mcp.request_handler, priority: -1000 }]

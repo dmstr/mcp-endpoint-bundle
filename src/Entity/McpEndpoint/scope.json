@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Endpoint scope",
+  "description": "What the tools of this endpoint may see, per scope key, e.g. {\"collections\": [\"handbook\", \"0b5e...\"]}. A tool that needs a scope declares its key; an endpoint that allows such a tool needs a non-empty list for that key. References are resolved by the scope resolver of their key when the endpoint is saved (for example a name or a UUID) and stored as full ids; an unknown reference answers 422. Nothing is linked: when a referenced item is deleted later, its id stays here and the tools skip it.",
+  "type": "object",
+  "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+  "additionalProperties": {
+    "type": "array",
+    "items": { "type": "string", "minLength": 1, "maxLength": 190 },
+    "maxItems": 200
+  },
+  "default": {}
+}

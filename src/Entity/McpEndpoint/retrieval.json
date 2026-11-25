@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Endpoint retrieval",
+  "description": "Retrieval limits of the search tools of this endpoint. A key that is not set takes the application-wide default of the endpoint policy.",
+  "type": "object",
+  "properties": {
+    "maxK": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "title": "Maximum results",
+      "description": "Upper bound of the result count a search may ask for; a larger `k` is clamped to it. Default: the policy's `defaultMaxK()`."
+    },
+    "hybrid": {
+      "type": "boolean",
+      "title": "Hybrid retrieval",
+      "description": "Combine vector and keyword search. Default: the policy's `defaultHybrid()`."
+    },
+    "hybridWeight": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "title": "Hybrid weight",
+      "description": "Weight of the keyword part in hybrid retrieval, 0 to 1. Default: the policy's `defaultHybridWeight()`."
+    }
+  },
+  "additionalProperties": false,
+  "default": {}
+}

@@ -1,0 +1,81 @@
+{
+    "name": "dmstr/mcp-endpoint-bundle",
+    "description": "Symfony bundle for MCP endpoint profiles: the `McpEndpoint` entity (slug, tool allowlist, read-only flag, required permission, scope, retrieval limits) with admin CRUD for API Platform, validation against the API Platform MCP tools, pluggable scope resolvers, a policy port for application-wide defaults, request-time enforcement per `/mcp/{slug}` and an idempotent seed command.",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "keywords": [
+        "mcp",
+        "model-context-protocol",
+        "api-platform",
+        "symfony",
+        "bundle"
+    ],
+    "authors": [
+        {
+            "name": "diemeisterei GmbH",
+            "homepage": "https://diemeisterei.de"
+        }
+    ],
+    "require": {
+        "php": ">=8.5",
+        "api-platform/core": "^4.4.8",
+        "dmstr/openapi-json-schema-bundle": "^0.5",
+        "doctrine/dbal": "^3.8",
+        "doctrine/doctrine-bundle": "^2.14",
+        "doctrine/doctrine-migrations-bundle": "^3.4",
+        "doctrine/migrations": "^3.9",
+        "doctrine/orm": "^3.3",
+        "gedmo/doctrine-extensions": "^3.20",
+        "mcp/sdk": "^0.9",
+        "opis/json-schema": "^2.6",
+        "psr/http-factory": "^1.1",
+        "psr/http-message": "^2.0",
+        "psr/log": "^1.0 || ^2.0 || ^3.0",
+        "symfony/config": "^7.4",
+        "symfony/console": "^7.4",
+        "symfony/dependency-injection": "^7.4",
+        "symfony/doctrine-bridge": "^7.4",
+        "symfony/expression-language": "^7.4",
+        "symfony/framework-bundle": "^7.4",
+        "symfony/http-foundation": "^7.4",
+        "symfony/http-kernel": "^7.4",
+        "symfony/mcp-bundle": "^0.15",
+        "symfony/object-mapper": "^7.4",
+        "symfony/psr-http-message-bridge": "^7.4",
+        "symfony/security-bundle": "^7.4",
+        "symfony/security-core": "^7.4",
+        "symfony/serializer": "^7.4",
+        "symfony/service-contracts": "^3.5",
+        "symfony/uid": "^7.4",
+        "symfony/validator": "^7.4",
+        "symfony/yaml": "^7.4"
+    },
+    "require-dev": {
+        "ext-pdo_pgsql": "*",
+        "dmstr/doctrine-audit-log-bundle": "^0.4",
+        "nyholm/psr7": "^1.8",
+        "phpunit/phpunit": "^12.0 || ^13.0",
+        "symfony/browser-kit": "^7.4",
+        "symfony/http-client": "^7.4"
+    },
+    "suggest": {
+        "nyholm/psr7": "A PSR-17 implementation is needed at runtime: symfony/mcp-bundle discovers the PSR-17 factories the MCP transport uses through php-http/discovery.",
+        "dmstr/doctrine-audit-log-bundle": "Provides a Gedmo loggable listener and log entry entity, so every endpoint change is recorded in an audit log."
+    },
+    "autoload": {
+        "psr-4": {
+            "Dmstr\\McpEndpoint\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dmstr\\McpEndpoint\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": false
+        }
+    }
+}
